@@ -1,6 +1,8 @@
 import { type Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/react"
 
 // Import Poppins font
 const poppins = Poppins({
@@ -28,6 +30,8 @@ export default function RootLayout({
       </head>
       <body>
         {/* Header */}
+        <SpeedInsights />
+        <Analytics />
         <header className="header">
           <div className="container">
           </div>

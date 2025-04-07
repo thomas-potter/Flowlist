@@ -8,19 +8,22 @@
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node", // Use "node" for module resolution
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": ".", // Set the base URL for absolute imports
+    "paths": {
+      "@lib/*": ["src/lib/*"], // Add alias for lib folder
+      "@app/*": ["src/app/*"], // Add alias for app folder
+      "@api/*": ["pages/api/*"] // Add alias for API folder
+    },
     "plugins": [
       {
         "name": "next"
       }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    ]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

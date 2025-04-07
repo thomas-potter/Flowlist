@@ -1,26 +1,372 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* General styles */
+html {
+  background: radial-gradient(circle at center, #0a0a0a, #000); /* Subtle gradient */
+  color: #fff; /* White text */
+  font-family: 'Poppins', sans-serif; /* Poppins font */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin-top: 5vh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally */
+  justify-content: flex-start; /* Align items at the top */
+  width: 100%; /* Take up full width */
+}
+
+/* Greeting Section */
+.greeting-section {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.greeting-section h2 {
+  font-size: 24px; /* Bigger font size */
+  font-weight: 700; /* Higher font weight */
+  margin: 0;
+}
+
+/* Blur effect when modal is active */
+.blurred {
+  filter: blur(5px); /* Apply blur effect */
+  pointer-events: none; /* Prevent interaction with blurred content */
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
+  padding: 32px;
+  width: 600px;
+  text-align: center;
+  z-index: 100;
+}
+
+.modal h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.modal p {
+  font-size: 16px;
+  font-weight: 400;
+  color: #aaa;
+  margin-bottom: 24px;
+}
+
+.modal input {
+  width: 80%;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.modal button {
+  background-color: #fff;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700; /* Higher font weight for buttons */
+  padding: 12px 24px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.modal button:hover {
+  background-color: #f3f3f3;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  transform: scale(1.1);
+}
+
+/* Radial Settings Menu */
+.settings-menu {
+  position: fixed;
+  bottom: 20px;
+  right: 20px; /* Keep the menu on the left */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-button {
+  background-color: #000; /* Black button */
+  color: #fff; /* White icon */
+  border: none;
+  border-radius: 50%; /* Circle shape */
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth transition for background and icon */
+  z-index: 10;
+  font-size: 24px; /* Icon size */
+}
+
+.settings-button:hover {
+  background-color: #333; /* Slightly lighter black */
+}
+
+.settings-button.open {
+  background-color: #fff; /* White circle when open */
+  color: #000; /* Black "X" icon */
+  transform: rotate(90deg); /* Rotate animation for the "X" */
+  transition: all 0.3s ease; /* Smooth transition for color and rotation */
+}
+
+.radial-menu {
+  position: absolute;
+  display: flex;
+  flex-direction: row; /* Align items horizontally */
+  align-items: center; /* Center items vertically */
+  gap: 10px; /* Space between text and circle */
+  top: -70px; /* Push the reset button up */
+  left: -20px; /* Adjust position to align text to the left */
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.settings-menu.open .radial-menu {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reset-name {
+  background-color: #fff; /* White circle */
+  color: #000; /* Black text */
+  border: none;
+  border-radius: 50%; /* Circle shape */
+  width: 40px;
+  height: 40px;
+  font-weight: 700; /* Bold text */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reset-name:hover {
+  background-color: #f3f3f3; /* Slightly lighter white */
+}
+
+.radial-menu span {
+  color: #fff; /* White text */
+  font-size: 16px; /* Text size */
+  font-weight: 600; /* Bold text */
+}
+
+/* Tabs and Buttons */
+.tabs-and-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tabs button {
+  padding: 6px 12px;
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700; /* Higher font weight for tabs */
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tabs button:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+.tabs .active-tab {
+  background-color: #fff;
+  color: #000;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.buttons .clear-completed, .check-all {
+  padding: 6px 12px;
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #ffffff00;
+  border-radius: 20px; /* Pill shape */
+  font-size: 14px;
+  font-weight: 700; /* Higher font weight for buttons */
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.buttons .clear-completed:hover, .check-all:hover {
+  border: 1px solid #fff;
+}
+
+/* Task Section */
+.task-section {
+  width: 600px; /* Fixed width for consistent alignment */
+  max-width: 90%; /* Ensure it doesn't overflow on smaller screens */
+  margin-left: auto; /* Center horizontally */
+  margin-right: auto; /* Center horizontally */
+  padding: 16px; /* Padding inside the task section */
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 12px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Task Adder */
+.task-adder {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between input and button */
+}
+
+.task-adder input {
+  flex: 1; /* Take up remaining space */
+  background-color: rgba(0, 0, 0, 0.8); /* Black with transparency */
+  color: #fff; /* White text */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+  border-radius: 8px; /* Rounded edges */
+  padding: 12px;
+  font-size: 18px; /* Font size */
+  font-weight: 400; /* Lower font weight for placeholder */
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2); /* Subtle divider line */
+  margin: 16px 0;
+}
+
+/* Task List */
+.task-list {
+  list-style: none; /* Remove bullet points */
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+  width: 100%; /* Ensure the task list takes up the full width of the task section */
+}
+
+.task-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Space between elements */
+  padding: 8px 12px; /* Padding inside each task item */
+  width: 100%; /* Ensure each task item takes up the full width of the task list */
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+  border-radius: 4px; /* Rounded edges */
+  margin-bottom: 8px; /* Space between tasks */
+  transition: all 0.2s ease; /* Smooth transition */
+  box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+.task-list li:hover {
+  transform: translateY(-2px); /* Slight lift on hover */
+  background-color: rgba(255, 255, 255, 0.05); /* Subtle background change */
+}
+
+.task-list li .checkbox {
+  appearance: none; /* Remove default checkbox styling */
+  width: 16px; /* Checkbox size */
+  height: 16px; /* Checkbox size */
+  border: 1px solid #fff; /* White border */
+  border-radius: 4px; /* Rounded edges */
+  cursor: pointer; /* Pointer cursor */
+  margin-right: 8px; /* Space to the right */
+  position: relative; /* Position for checkmark */
+}
+
+.task-list li .checkbox:checked {
+  background-color: #fff; /* White background */
+}
+
+.task-list li .checkbox:checked::before {
+  content: "\2713"; /* Unicode checkmark character */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the checkmark */
+  color: #000; /* Black checkmark */
+  font-size: 14px; /* Checkmark size */
+}
+
+.task-list li .task-text {
+  flex: 1; /* Ensure the text takes up the remaining space */
+  min-width: 0; /* Prevent text overflow */
+  font-weight: 700; /* Higher font weight for tasks */
+}
+
+.task-list li .task-text.completed {
+  text-decoration: line-through; /* Strike-through for completed tasks */
+  color: #aaa; /* Gray text for completed tasks */
+}
+
+.task-list li button {
+  background: none; /* Transparent background */
+  color: #f87171; /* Red text */
+  font-size: 20px; /* Font size */
+  font-weight: 700; /* Higher font weight for delete button */
+  border: none; /* No border */
+  cursor: pointer; /* Pointer cursor */
+  transition: color 0.3s ease, opacity 0.3s ease; /* Smooth transition */
+  opacity: 0; /* Hidden by default */
+}
+
+.task-list li:hover button {
+  opacity: 1; /* Show on hover */
+}
+
+.task-list li button:hover {
+  color: #ef4444; /* Brighter red on hover */
+}
+
+.edit-input {
+  flex: 1;
+  background-color: transparent; /* Keep the background consistent */
+  color: #fff; /* Keep the text color consistent */
+  border: none; /* Remove border */
+  border-bottom: 1px solid #fff; /* Add underline */
+  padding: 0;
+  font-size: 16px;
+  font-weight: 800;
+  outline: none;
+}
+
+.edit-input:focus {
+  border-bottom: 1px solid #aaa; /* Slightly dim underline on focus */
+}
+
+/* Task Count */
+.task-count {
+  text-align: center; /* Center the text */
+  margin-top: 20px; /* Space above */
+  font-size: 16px; /* Font size */
+  color: #aaa; /* Gray text */
 }

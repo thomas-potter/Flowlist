@@ -1,103 +1,324 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+
+interface Task {
+  id: string;
+  text: string;
+  completed: boolean;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [newTask, setNewTask] = useState("");
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+  const [userName, setUserName] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+  const [greeting, setGreeting] = useState(""); // State for dynamic greeting
+  const editInputRef = useRef<HTMLInputElement>(null); // Ref for the input field
+  const dragItemIndex = useRef<number | null>(null); // Store the index of the dragged item
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  // Load tasks and user name from localStorage on component mount
+  useEffect(() => {
+    const storedTasks = localStorage.getItem("tasks");
+    const storedName = localStorage.getItem("userName");
+
+    if (storedTasks) {
+      setTasks(JSON.parse(storedTasks));
+    }
+
+    if (storedName) {
+      setUserName(storedName);
+    } else {
+      setShowModal(true); // Show modal for new users
+    }
+
+    // Determine greeting based on the user's local time
+    const currentHour = new Date().getHours();
+    if (currentHour >= 5 && currentHour < 12) {
+      setGreeting("Good morning");
+    } else if (currentHour >= 12 && currentHour < 18) {
+      setGreeting("Good afternoon");
+    } else {
+      setGreeting("Good evening");
+    }
+  }, []);
+
+  // Save tasks to localStorage whenever tasks change
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
+
+  const handleNameSubmit = (name: string) => {
+    setUserName(name);
+    localStorage.setItem("userName", name);
+    setShowModal(false);
+  };
+
+  const resetName = () => {
+    setUserName(null);
+    localStorage.removeItem("userName");
+    setShowSettings(false);
+    setShowModal(true); // Show modal again
+  };
+
+  const addTask = () => {
+    if (newTask.trim() === "") return;
+
+    const newTaskObj: Task = {
+      id: Date.now().toString(),
+      text: newTask,
+      completed: false,
+    };
+    setTasks((prev) => [...prev, newTaskObj]);
+    setNewTask("");
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      addTask();
+    }
+  };
+
+  const completeTask = (id: string) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks((prev) => prev.filter((task) => task.id !== id));
+  };
+
+  const checkAllTasks = () => {
+    setTasks((prev) => prev.map((task) => ({ ...task, completed: true })));
+  };
+
+  const clearCompletedTasks = () => {
+    setTasks((prev) => prev.filter((task) => !task.completed));
+  };
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "active") return !task.completed;
+    if (filter === "completed") return task.completed;
+    return true; // "all" filter
+  });
+
+  const activeTaskCount = tasks.filter((task) => !task.completed).length;
+
+  const handleEditTask = (id: string, text: string) => {
+    setEditingTaskId(id);
+    setEditText(text);
+    setTimeout(() => {
+      editInputRef.current?.focus(); // Automatically focus the input field
+    }, 0);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditText(e.target.value);
+  };
+
+  const handleEditSubmit = (id: string) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, text: editText } : task
+      )
+    );
+    setEditingTaskId(null);
+  };
+
+  const handleEditCancel = () => {
+    setEditingTaskId(null);
+  };
+
+  // Drag-and-Drop Handlers
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    dragItemIndex.current = index; // Store the index of the dragged task
+    e.dataTransfer.effectAllowed = "move"; // Set the drag effect
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // Required to allow dropping
+  };
+
+  const handleDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+
+    if (dragItemIndex.current === null) {
+      return; // Prevent drop if drag start was not properly initiated
+    }
+
+    const newTasks = [...tasks];
+    const [draggedTask] = newTasks.splice(dragItemIndex.current, 1); // Remove dragged task
+    newTasks.splice(index, 0, draggedTask); // Insert at new position
+
+    setTasks(newTasks);
+    dragItemIndex.current = null; // Reset drag index
+  };
+
+  const handleDragEnd = () => {
+    dragItemIndex.current = null; // Reset drag index
+  };
+
+  return (
+    <div>
+      {/* Modal for new users */}
+      {showModal && (
+        <div className="modal">
+          <h2>Welcome!</h2>
+          <p>Please enter your name to get started:</p>
+          <input
+            type="text"
+            placeholder="Your name"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.currentTarget.value.trim() !== "") {
+                handleNameSubmit(e.currentTarget.value.trim());
+              }
+            }}
+          />
+          <button
+            onClick={() => {
+              const input = document.querySelector(".modal input") as HTMLInputElement;
+              if (input && input.value.trim() !== "") {
+                handleNameSubmit(input.value.trim());
+              }
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            Submit
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      )}
+
+      {/* Main Content */}
+      <div className={showModal ? "content blurred" : "content"}>
+        {/* Greeting Section */}
+        <div className="greeting-section">
+          <h2>
+            {userName ? `${greeting}, ${userName}!` : `${greeting}!`}
+          </h2>
+        </div>
+
+        {/* Task Section */}
+        <div className="task-section">
+          {/* Task Adder */}
+          <div className="task-adder">
+            <input
+              type="text"
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder="What needs to be done?"
+            />
+          </div>
+
+          {/* Tabs and Buttons */}
+          <div className="tabs-and-buttons">
+            <div className="tabs">
+              <button
+                className={filter === "all" ? "active-tab" : ""}
+                onClick={() => setFilter("all")}
+              >
+                All
+              </button>
+              <button
+                className={filter === "active" ? "active-tab" : ""}
+                onClick={() => setFilter("active")}
+              >
+                Active
+              </button>
+              <button
+                className={filter === "completed" ? "active-tab" : ""}
+                onClick={() => setFilter("completed")}
+              >
+                Completed
+              </button>
+            </div>
+            <div className="buttons">
+              <button className="check-all" onClick={checkAllTasks}>
+                Check All
+              </button>
+              <button className="clear-completed" onClick={clearCompletedTasks}>
+                Clear Completed
+              </button>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="divider"></div>
+
+          {/* Task List */}
+          <ul className="task-list" onDragOver={handleDragOver}>
+            {filteredTasks.map((task, index) => (
+              <li
+                key={task.id}
+                draggable // Enable dragging
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={handleDragEnd}
+                style={{
+                  cursor: editingTaskId === task.id ? "default" : "grab",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  className="checkbox"
+                  checked={task.completed}
+                  onChange={() => completeTask(task.id)}
+                />
+                {editingTaskId === task.id ? (
+                  <input
+                    type="text"
+                    value={editText}
+                    onChange={handleEditChange}
+                    onBlur={() => handleEditSubmit(task.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleEditSubmit(task.id);
+                      if (e.key === "Escape") handleEditCancel();
+                    }}
+                    className="edit-input"
+                    ref={editInputRef} // Attach the ref for auto-focus
+                  />
+                ) : (
+                  <span
+                    className={`task-text ${task.completed ? "completed" : ""}`}
+                    onDoubleClick={() => handleEditTask(task.id, task.text)}
+                  >
+                    {task.text}
+                  </span>
+                )}
+                <button onClick={() => deleteTask(task.id)}>X</button>
+              </li>
+            ))}
+          </ul>
+
+          {/* Task Count */}
+          <div className="task-count">
+            <p>{activeTaskCount} items left</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Radial Settings Button */}
+      <div className={`settings-menu ${showSettings ? "open" : ""}`}>
+        <button
+          className={`settings-button ${showSettings ? "open" : ""}`}
+          onClick={() => setShowSettings(!showSettings)}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {showSettings ? "✖️" : "⚙️"}
+        </button>
+        {showSettings && (
+          <div className="radial-menu">
+            <button className="reset-name" onClick={resetName}>
+              Reset Name
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -24,10 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} antialiased`}>
       <head>
-        <title>Task Flow</title>
+        <title>Flowlist</title>
         <meta name="description" content="Manage your daily tasks" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="src/app/Flowtask Icon.png" />
+        <link rel="icon" href="/Flowtask Icon.png" />
       </head>
       <body>
         {/* Header */}

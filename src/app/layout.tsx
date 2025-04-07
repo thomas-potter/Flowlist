@@ -27,6 +27,7 @@ export default function RootLayout({
         <title>Task Flow</title>
         <meta name="description" content="Manage your daily tasks" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="src/app/Flowtask Icon.png" />
       </head>
       <body>
         {/* Header */}

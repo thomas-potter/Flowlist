@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+const nextConfig = {
+  experimental: {
+    optimizeCss: false, // Disable LightningCSS
+    legacyBrowsers: false, // Disable support for legacy browsers
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
